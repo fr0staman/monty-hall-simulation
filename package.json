@@ -1,0 +1,16 @@
+{
+  "name": "monty-hall-simulation",
+  "homepage": "https://github.com/fr0staman/monty-hall-simulation",
+  "packageManager": "yarn@3.1.0",
+  "scripts": {
+    "start": "npm run start --prefix server",
+    "server": "npm run server --prefix server",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.1"
+  },
+  "author": "Y"
+}
