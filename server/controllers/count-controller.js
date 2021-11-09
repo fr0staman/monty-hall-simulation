@@ -33,8 +33,21 @@ class CountController {
   }
 
   async statistic(req, res, next) {
-    const stat = await Result.find({}, {unchanged: 1, changed: 1, _id: 0}).lean();
-    return res.json({changed: stat[0].changed, unchanged: stat[0].unchanged});
+    const stat = await Result.find({}, 
+      {
+        unchanged: 1, 
+        changed: 1, 
+        unLoose: 1, 
+        cgLoose: 1, 
+        _id: 0
+      }).lean();
+    return res.json(
+      {
+        changed: stat[0].changed, 
+        unchanged: stat[0].unchanged, 
+        unLoose: stat[0].unLoose, 
+        cgLoose: stat[0].cgLoose 
+      });
   }
 }
 

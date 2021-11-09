@@ -10,7 +10,7 @@ export default function MontyHall(props) {
     reveal: false,
     winUnchanged: 0,
     winChanged: 0,
-    status: 0
+    status: null
   });
 
   const axiosConfig = {
@@ -21,10 +21,10 @@ export default function MontyHall(props) {
     }
   };
 
-  async function increment() {
-    if (hallStates.status && hallStates.doors[hallStates.selected]) {
+  async function increment(clock) {
+    if (clock ? hallStates.doors[hallStates.switch] : hallStates.doors[hallStates.selected]) {
       let stateStatus;
-      if (hallStates.status === 2) {
+      if (clock) {
         stateStatus = 1;
       } else {
         stateStatus = 0;
@@ -40,24 +40,30 @@ export default function MontyHall(props) {
     }
   }
 
-  async function getResults() {
-    await increment();
+  async function getResults(clock) {
+    await increment(clock);
+    console.log(hallStates);
+    setHallStates(prevState => ({
+      ...prevState,
+      switch: null,
+      hint: null,
+      reveal: true
+    }))
 
-    axios.get('http://localhost:9443/api/statistic', axiosConfig)
+    setTimeout(() => {
+      axios.get('http://localhost:9443/api/statistic', axiosConfig)
       .then((res) => {
         setHallStates(prevState => ({
           ...prevState,
-          switch: null,
-          hint: null,
-          reveal: true,
           winChanged: res.data.changed,
           winUnchanged: res.data.unchanged
         }));
-        console.log("RESPONSE RECEIVED: ", res);
+        console.log("RESPONSE RECEIVED: ", res.data);
       })
       .catch((err) => {
         console.log("AXIOS ERROR: ", err);
       });
+    }, 300);
   }
 
   function setDoors() {
@@ -108,14 +114,16 @@ export default function MontyHall(props) {
       selected: hallStates.switch,
       status: 2
     });
-
-    getResults();
+    getResults(true);
   }
 
-  useEffect(() =>
-    setDoors(), []);
-  useEffect(() =>
-    getResults(), []);
+  useEffect(() => {
+        setDoors();
+        getResults(false);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []);
+
   return (
     <div className="container">
       <h1 className="title">
@@ -124,19 +132,13 @@ export default function MontyHall(props) {
       <div className="results">
         <div className="scorecard">
           <div>Перемоги зі зміною: {hallStates.winChanged}</div>
-          <div>Програші без зміни: {hallStates.winUnchanged}</div>
+          <div>Перемоги без зміни: {hallStates.winUnchanged}</div>
         </div>
         {hallStates.switch !== null && (
           <div className="buttons">
             <h3>Змінити вибір до двері #{hallStates.switch + 1}?</h3>
             <button onClick={() => switchDoor()}>Так</button>
-            <button onClick={() => {
-              setHallStates({
-                ...hallStates,
-                status: 1
-              });
-              getResults();
-            }}>Ні
+            <button onClick={() => getResults(false)}>Ні
             </button>
           </div>
         )}
