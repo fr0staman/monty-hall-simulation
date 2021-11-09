@@ -10,20 +10,23 @@ class CountController {
       if (count) {
         const stat = await Result.find({}, {unchanged: 1, changed: 1, _id: 1}).lean();
         if (status) {
-          const newUnchanged = stat[0].changed + 1;
-          await Result.updateOne({_id: stat[0]._id}, {unchanged: newUnchanged});
-        } else {
           const newChanged = stat[0].changed + 1;
           await Result.updateOne({_id: stat[0]._id}, {changed: newChanged});
+          return res.json({status: 'SUCCESS 1'});
+        } else {
+          const newUnchanged = stat[0].unchanged + 1;
+          await Result.updateOne({_id: stat[0]._id}, {unchanged: newUnchanged});
+          return res.json({status: 'SUCCESS 2'});
         }
       } else {
         if (status) {
           await Result.create({unchanged: 0, changed: 1});
+          return res.json({status: 'SUCCESS 3'});
         } else {
           await Result.create({unchanged: 1, changed: 0});
+          return res.json({status: 'SUCCESS 4'});
         }
       }
-      return res.json({status: 'ACCESS'});
     } catch (e) {
       console.log(e);
     }

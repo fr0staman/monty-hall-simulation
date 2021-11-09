@@ -105,3 +105,4 @@ dist
 
 .yarn
 .idea
+server/config/config.env
