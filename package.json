@@ -11,6 +11,5 @@
   },
   "devDependencies": {
     "concurrently": "^6.2.1"
-  },
-  "author": "Y"
+  }
 }

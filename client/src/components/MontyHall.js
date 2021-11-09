@@ -1,35 +1,35 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 
-export default class MontyHall extends React.Component {
-    state = {
-      doors: [],
-      switch: null,
-      hint: null,
-      selected: null,
-      reveal: false,
-      wins: 0,
-      losses: 0
-    }
+export default function MontyHall(props) {
+    const [hallStates, setHallStates] = useState({
+        doors: [],
+        switch: null,
+        hint: null,
+        selected: null,
+        reveal: false,
+        wins: 0,
+        losses: 0
+    })
   
-    getResults() {
-      this.setState(prevState => {
-        return {
+    function getResults() {
+      setHallStates(prevState => ({
+          ...prevState,
           switch: null,
           hint: null,
           reveal: true,
           wins: prevState.doors[prevState.selected] ? prevState.wins + 1 : prevState.wins,
           losses:  !prevState.doors[prevState.selected] ? prevState.losses + 1 : prevState.losses
-        }
-      });
+      }));
     }
   
-    setDoors() {
+    function setDoors() {
         let result = Math.floor(Math.random() * Math.floor(3) + 1);
         let doors = [false, false, false];
         doors[result - 1] = true;
       
-        this.setState({
-          doors,
+        setHallStates({
+          ...hallStates,
+          doors: doors,
           selected: null,
           reveal: false,
           hint: null,
@@ -37,12 +37,12 @@ export default class MontyHall extends React.Component {
         });
     }
   
-    onChooseDoor(selected) {
-      if (this.state.selected !== null) return;
+    function onChooseDoor(selected) {
+      if (hallStates.selected !== null) return;
       
       let switchOption;
       let hintOption;
-      let doors = this.state.doors;
+      let doors = hallStates.doors;
       
       doors.forEach((door, index) => {
         if (!door && selected !== index) {
@@ -56,26 +56,29 @@ export default class MontyHall extends React.Component {
         }
       });
             
-      this.setState({
+      setHallStates({
+          ...hallStates,
         hint: hintOption,
         switch: switchOption,
         selected
       });
     }
     
-    switchDoor() {
-      this.setState({
-        selected: this.state.switch
+    function switchDoor() {
+      setHallStates({
+        ...hallStates,
+        selected: hallStates.switch
       });
       
-      this.getResults();
+      getResults();
     }
   
-    componentDidMount() {
-      this.setDoors();
-    }
+    useEffect(() => 
+      setDoors()
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    , []);
     
-    render() {
        return (
          <div className="container">
           <h1 className="title">
@@ -83,36 +86,36 @@ export default class MontyHall extends React.Component {
           </h1>
           <div className="results">
             <div className="scorecard">
-              <div>Перемоги: {this.state.wins}</div>
-              <div>Програші: {this.state.losses}</div>
+              <div>Перемоги: {hallStates.wins}</div>
+              <div>Програші: {hallStates.losses}</div>
             </div>
-           {this.state.switch !== null && (
+           {hallStates.switch !== null && (
              <div className="buttons">
-               <h3>Змінити вибір до двері #{this.state.switch + 1}?</h3>
-               <button onClick={() => this.switchDoor()}>Так</button>
-               <button onClick={() => this.getResults()}>Ні</button>
+               <h3>Змінити вибір до двері #{hallStates.switch + 1}?</h3>
+               <button onClick={() => switchDoor()}>Так</button>
+               <button onClick={() => getResults()}>Ні</button>
              </div>
            )}
-           {this.state.reveal && (
+           {hallStates.reveal && (
              <div className="buttons">
-               <h3>{this.state.doors[this.state.selected] ? 'Ви виграли! 😁' : 'Ти програв! 😭' }</h3>
-               <button onClick={() => this.setDoors()}>Зіграти ще раз?</button>
+               <h3>{hallStates.doors[hallStates.selected] ? 'Ви виграли! 😁' : 'Ти програв! 😭' }</h3>
+               <button onClick={() => setDoors()}>Зіграти ще раз?</button>
              </div>
            )}
            </div>
           <div className="doors">
-            {this.state.doors.map((door, index) => {
+            {hallStates.doors.map((door, index) => {
               return (
                   <div 
-                    className={`door door--${index+1} ${this.state.selected === index && 'door--selected animated infinite pulse'}`}
-                    onClick={() => this.onChooseDoor(index)}
+                    className={`door door--${index+1} ${hallStates.selected === index && 'door--selected animated infinite pulse'}`}
+                    onClick={() => onChooseDoor(index)}
                   >
-                    {this.state.reveal &&  
+                    {hallStates.reveal &&  
                       <div className="prize">
                         І це...
                         <div class="icon">{door ? 'Автомобіль! 🚘' : 'Коза! 🐐'}</div>
                       </div>}
-                     {index === this.state.hint &&  
+                     {index === hallStates.hint &&  
                       <div className="hint">
                         Тут козочка!
                         <div className="icon">🐐</div>
@@ -123,6 +126,5 @@ export default class MontyHall extends React.Component {
           </div>
         </div>
       )
-    }
   }
   
